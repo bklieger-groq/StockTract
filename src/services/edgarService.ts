@@ -1,6 +1,7 @@
 import { EDGAR_API_BASE_URL, USER_AGENT } from '../config/constants';
 import { fetchWithRetry } from '../utils/fetchWithRetry';
 import { logger } from '../utils/logger';
+import { JSDOM } from 'jsdom';
 
 async function getLatest10KURL(cik: string): Promise<string> {
   const submissionsUrl = `${EDGAR_API_BASE_URL}${cik}.json`;
@@ -39,3 +40,43 @@ export async function getLatest10K(cik: string): Promise<string> {
     throw error;
   }
 }
+
+export async function split10K(content: string): Promise<string[]> {
+  try {
+    const sections = content.split('<hr style="page-break-after:always;"/>');
+    return sections.map(section => section.trim()).filter(section => section.length > 0);
+  } catch (error: any) {
+    logger.error(`Error in getLatest10KSections: ${error.message}`);
+    throw error;
+  }
+}
+
+export function extractTextFrom10K(sections: string[]): string[] {
+    return sections.map(section => {
+      const dom = new JSDOM(section);
+      const doc = dom.window.document;
+      
+      // Extract text from all elements, removing extra whitespace
+      const textNodes = doc.evaluate(
+        '//text()', 
+        doc, 
+        null, 
+        dom.window.XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, 
+        null
+      );
+  
+      let pageText = '';
+      for (let i = 0; i < textNodes.snapshotLength; i++) {
+        const node = textNodes.snapshotItem(i);
+        if (node) {
+          const text = node.textContent?.trim();
+          if (text) {
+            pageText += text + ' ';
+          }
+        }
+      }
+  
+      // Remove extra spaces and trim
+      return pageText.replace(/\s+/g, ' ').trim();
+    }).filter(text => text.length > 0); // Remove empty pages
+  }
