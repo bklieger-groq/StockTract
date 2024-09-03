@@ -80,3 +80,17 @@ export function extractTextFrom10K(sections: string[]): string[] {
       return pageText.replace(/\s+/g, ' ').trim();
     }).filter(text => text.length > 0); // Remove empty pages
   }
+
+  export function findPagesWithMostKeywordHits(pages: string[], keyword: string, numPages: number): string[] {
+    const pageHits: { page: string; hits: number }[] = pages.map(page => {
+      const regex = new RegExp(keyword, 'gi');
+      const hits = (page.match(regex) || []).length;
+      return { page, hits };
+    });
+  
+    // Sort pages by number of hits in descending order
+    pageHits.sort((a, b) => b.hits - a.hits);
+  
+    // Return the top numPages pages
+    return pageHits.slice(0, numPages).map(ph => ph.page);
+  }

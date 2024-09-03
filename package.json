@@ -13,6 +13,7 @@
     "@types/node": "^22.5.0",
     "@types/winston": "^2.4.4",
     "axios": "^1.7.5",
+    "groq-sdk": "^0.7.0",
     "jsdom": "^25.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4",
