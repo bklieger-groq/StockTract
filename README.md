@@ -8,5 +8,5 @@ CIK=0000789019 npm start
 
 ### Flow
 
-![assets/flow_1.png]
-![assets/flow_2.png]
+![Flow 1](assets/flow_1.png)
+![Flow 2](assets/flow_2.png)
